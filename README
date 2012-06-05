@@ -1,0 +1,44 @@
+<===> Himitsu <===>
+
+Author:
+* handle: sh0
+* post: sh0 ät yutani dot ee
+
+Algorithm:
+* key = substring(base64m(sha1(sha1(target) ^ sha1(master)), 0, 12)
+
+Inputs:
+* target - site/domain name
+* master - master password
+
+Description:
+* Strings "target" and "master" are hashed using SHA-1.
+* Those resulting hashes are XOR'ed together symmetrically.
+* Result is rehashed using SHA-1.
+* Binary string is turned to ASCII using *non-standard* base64 lookup string:
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345678901"
+  Note that the two last characters are 0 and 1.
+* First 12 characters from the last step result is the key.
+
+Notes:
+* Due to the xor operation in mixing target and master inputs, the inputs can
+  be swapped and will still give same result key.
+* Most importantly getting master or sha1(master) from key must be protected.
+  This is achieved by the rehashing step. Finding SHA-1 collisions will not
+  help attacker. Target input does not have to be secret.
+
+Problems:
+* Presence of the numbers in base64 lookup is low, giving higher possibility
+  of numberless keys. This will not give much advantage in brute-force
+  cracking with only-alphabetic key assumption, but may just be a problem
+  with sites that require numbers to be present in password.
+
+Programs:
+* web - index.php - For browsers with JavaScript enabled, will generate key on
+  the fly. Otherwise falls back to standard form and calculates key on server
+  side using php.
+* web - index.html - Javascript only solution.
+* posix - Console tool for simple key generation.
+* gnome - Console tool, but uses gnome keyring for master key storage and
+  copies the resulting key to clipboard. Does not print key on screen.
+
